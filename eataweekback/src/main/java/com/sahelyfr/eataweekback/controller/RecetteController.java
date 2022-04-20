@@ -2,13 +2,18 @@ package com.sahelyfr.eataweekback.controller;
 
 import java.util.Optional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sahelyfr.eataweekback.model.Recette;
 import com.sahelyfr.eataweekback.service.RecetteService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,6 +65,21 @@ public class RecetteController {
 
             rs.saveRecette(currentRecette);
             return currentRecette;
+        }else{
+            return null;
+        }
+    }
+
+    @PostMapping(path="/recette", consumes=MediaType.APPLICATION_JSON_VALUE)
+    public Recette createRecette(@RequestBody String payload) throws JsonMappingException, JsonProcessingException{
+        System.out.println(payload);
+        ObjectMapper mapper = new ObjectMapper();
+
+        Recette recette = mapper.readValue(payload, Recette.class);
+        
+        if(recette.getName() != null && recette.getLink() != null){
+            rs.saveRecette(recette);
+            return recette;
         }else{
             return null;
         }

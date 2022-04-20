@@ -6,6 +6,7 @@ import javax.annotation.security.RolesAllowed;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +25,7 @@ public class LoginController {
         return "Welcome Admin";
     }
 
-    @RequestMapping("/*")
+    @GetMapping("/*")
     public String getUserInfo(Principal user){
         StringBuffer userInfo = new StringBuffer();
         if(user instanceof UsernamePasswordAuthenticationToken){
