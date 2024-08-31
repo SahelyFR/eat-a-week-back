@@ -1,12 +1,14 @@
-package com.sahelyfr.eataweekback.filter;
+package com.sahelyfr.eataweekback.configuration.filter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.sahelyfr.eataweekback.service.TokenAuthenticationService;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,10 +29,12 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException, IOException, ServletException {
 
-        String username = request.getHeader("username");
-        String password = request.getHeader("password");
+        String username = new String(
+                Base64.getDecoder().decode(request.getHeader("username").getBytes(StandardCharsets.UTF_8)));
+        String password = new String(
+                Base64.getDecoder().decode(request.getHeader("password").getBytes(StandardCharsets.UTF_8)));
 
-        System.out.printf("JWTLoginFilter.attemptAuthentication: username/password= %s,%s", username, password);
+        System.out.printf("JWTLoginFilter.attemptAuthentication: username= %s", username);
         System.out.println();
 
         return getAuthenticationManager()
@@ -41,14 +45,9 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
 
-        System.out.println("JWTLoginFilter.successfulAuthentication:");
-
         // Write Authorization to Headers of Response.
         TokenAuthenticationService.addAuthentication(response, authResult.getName());
-
-        String authorizationString = response.getHeader("Authorization");
-
-        System.out.println("Authorization String=" + authorizationString);
+        response.setHeader("Authority", authResult.getAuthorities().toString());
     }
 
 }

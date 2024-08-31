@@ -10,6 +10,7 @@ import com.sahelyfr.eataweekback.service.RecetteService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,44 +20,51 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 public class RecetteController {
-    
+
     @Autowired
     private RecetteService rs;
 
-    @GetMapping("/recettes")
-    public Iterable<Recette> getAllRecettes(){
+    @GetMapping("/recettes/")
+    public Iterable<Recette> getAllRecettes() {
         return rs.getAllRecettes();
     }
 
     @GetMapping("/recettes/{season}")
-    public Iterable<Recette> getRecettesBySeason(@PathVariable("season") String season){
+    public Iterable<Recette> getRecettesBySeason(@PathVariable("season") String season) {
         return rs.getRecettesBySeason(season);
     }
 
     @GetMapping("/recette/{id}")
-    public Recette getRecette(@PathVariable("id") final Long id){
+    public Recette getRecette(@PathVariable("id") final Long id) {
+        System.out.println("Serving recette " + id.toString());
         Optional<Recette> recette = rs.getRecette(id);
-        if(recette.isPresent()){
+        if (recette.isPresent()) {
             return recette.get();
-        }else{
+        } else {
             return null;
         }
     }
 
     @PutMapping("/recette/{id}")
-    public Recette updateRecette(@PathVariable("id") final Long id, @RequestBody Recette recette){
+    public Recette updateRecette(@PathVariable("id") final Long id, @RequestBody Recette recette) {
+        System.out.println("Updating recette " + id.toString());
         Optional<Recette> re = rs.getRecette(id);
-        if(re.isPresent()){
+        if (re.isPresent()) {
             Recette currentRecette = re.get();
-            
+
             String name = recette.getName();
-            if(name != null){
+            if (name != null) {
                 currentRecette.setName(name);
             }
-            String link = recette.getLink();
-            if(link != null){
-                currentRecette.setLink(link);
+            String link = recette.getWeblink();
+            if (link != null) {
+                currentRecette.setWeblink(link);
+            }
+            String image = recette.getImage();
+            if (image != null) {
+                currentRecette.setImage(image);
             }
             currentRecette.setSpring(recette.isSpring());
             currentRecette.setSummer(recette.isSummer());
@@ -65,28 +73,28 @@ public class RecetteController {
 
             rs.saveRecette(currentRecette);
             return currentRecette;
-        }else{
+        } else {
             return null;
         }
     }
 
-    @PostMapping(path="/recette", consumes=MediaType.APPLICATION_JSON_VALUE)
-    public Recette createRecette(@RequestBody String payload) throws JsonMappingException, JsonProcessingException{
+    @PostMapping(path = "/recette/add", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Recette createRecette(@RequestBody String payload) throws JsonMappingException, JsonProcessingException {
         System.out.println(payload);
         ObjectMapper mapper = new ObjectMapper();
 
         Recette recette = mapper.readValue(payload, Recette.class);
-        
-        if(recette.getName() != null && recette.getLink() != null){
+
+        if (recette.getName() != null && recette.getWeblink() != null) {
             rs.saveRecette(recette);
             return recette;
-        }else{
+        } else {
             return null;
         }
     }
 
     @DeleteMapping("/recette/{id}")
-    public void deleteRecette(@PathVariable("id") final Long id){
+    public void deleteRecette(@PathVariable("id") final Long id) {
         rs.deleteRecette(id);
     }
 }
