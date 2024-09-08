@@ -1,12 +1,9 @@
 package com.sahelyfr.eataweekback.controller;
 
-import java.util.Optional;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sahelyfr.eataweekback.model.Recette;
-import com.sahelyfr.eataweekback.service.RecetteService;
+import com.sahelyfr.eataweekback.exceptions.InconsistentDataException;
+import com.sahelyfr.eataweekback.exceptions.NullArgumentException;
+import com.sahelyfr.eataweekback.dto.Recipe;
+import com.sahelyfr.eataweekback.service.RecipeService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -19,81 +16,47 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.sahelyfr.eataweekback.utils.Utils.checkNotNull;
+
 @RestController("/recipes")
 @CrossOrigin(origins = "http://localhost:3000")
-public class RecetteController {
+public class RecipeController {
     
     @Autowired
-    private RecetteService rs;
+    private RecipeService recipeService;
 
     @GetMapping
-    public Iterable<Recette> getAllRecettes(){
-        return rs.getAllRecettes();
+    public Iterable<Recipe> getAllRecipes(){
+        return recipeService.getAllRecipes();
     }
 
     @GetMapping("/{season}")
-    public Iterable<Recette> getRecettesBySeason(@PathVariable("season") String season){
-        return rs.getRecettesBySeason(season);
+    public Iterable<Recipe> getRecipesBySeason(@PathVariable("season") String season){
+        return recipeService.getRecipesBySeason(season);
     }
 
     @GetMapping("/{id}")
-    public Recette getRecette(@PathVariable("id") final Long id){
-        Optional<Recette> recette = rs.getRecette(id);
-        if(recette.isPresent()){
-            return recette.get();
-        }else{
-            return null;
-        }
+    public Recipe getRecipe(@PathVariable("id") final Long id) throws NullArgumentException {
+        checkNotNull("id", id);
+        return recipeService.getRecipe(id);
     }
 
     @PutMapping("/{id}")
-    public Recette updateRecette(@PathVariable("id") final Long id, @RequestBody Recette recette) {
-        System.out.println("Updating recette " + id.toString());
-        Optional<Recette> re = rs.getRecette(id);
-        if (re.isPresent()) {
-            Recette currentRecette = re.get();
-
-            String name = recette.getName();
-            if (name != null) {
-                currentRecette.setName(name);
-            }
-            String link = recette.getWeblink();
-            if (link != null) {
-                currentRecette.setWeblink(link);
-            }
-            String image = recette.getImage();
-            if (image != null) {
-                currentRecette.setImage(image);
-            }
-            currentRecette.setSpring(recette.isSpring());
-            currentRecette.setSummer(recette.isSummer());
-            currentRecette.setAutumn(recette.isAutumn());
-            currentRecette.setWinter(recette.isWinter());
-
-            rs.saveRecette(currentRecette);
-            return currentRecette;
-        } else {
-            return null;
-        }
+    public Recipe updateRecipe(@PathVariable("id") final Long recipeId, @RequestBody Recipe updatedRecipe) throws NullArgumentException, InconsistentDataException {
+        return recipeService.updateRecipe(recipeId, updatedRecipe);
     }
 
     @PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
-    public Recette createRecette(@RequestBody String payload) throws JsonMappingException, JsonProcessingException{
-        System.out.println(payload);
-        ObjectMapper mapper = new ObjectMapper();
+    public Recipe createRecipe(@RequestBody Recipe newRecipe) throws NullArgumentException {
+        System.out.println(newRecipe);
+        checkNotNull("newRecipe", newRecipe);
 
-        Recette recette = mapper.readValue(payload, Recette.class);
-
-        if (recette.getName() != null && recette.getWeblink() != null) {
-            rs.saveRecette(recette);
-            return recette;
-        } else {
-            return null;
-        }
+        return recipeService.createRecipe(newRecipe);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteRecette(@PathVariable("id") final Long id){
-        rs.deleteRecette(id);
+    public void deleteRecipe(@PathVariable("recipeId") final Long recipeId) throws NullArgumentException {
+        checkNotNull("recipeId", recipeId);
+        recipeService.deleteRecipe(recipeId);
     }
 }

@@ -1,36 +1,25 @@
 package com.sahelyfr.eataweekback.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
-
 import com.sahelyfr.eataweekback.model.User;
 import com.sahelyfr.eataweekback.repository.UserRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import lombok.Data;
-
-@Data
 @Service
 public class UserService {
 
-    @Autowired
-    UserRepository ur;
+    private final UserRepository userRepository;
 
-    EntityManager em;
-
-    public UserService(EntityManager entityManager) {
-        this.em = entityManager;
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    public void deleteUser(final Long id) {
-        ur.deleteById(id);
-    }
-
-    @Transactional
-    public User saveUser(User u) {
-        em.persist(u);
-        return u;
+    public List<User> allUsers() {
+        List<User> users = new ArrayList<>();
+        userRepository.findAll().forEach(users::add);
+        return users;
     }
 }

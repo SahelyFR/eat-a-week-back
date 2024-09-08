@@ -1,35 +1,47 @@
-package com.sahelyfr.eataweekback.configuration;
+package com.sahelyfr.eataweekback.domain;
 
 import java.time.LocalDate;
 
 public enum Season {
 
-    private static final int THIS_YEAR = LocalDate.now().getYear();
-    private static final LocalDate SPRING_START = LocalDate.of(THIS_YEAR, 3, 21);
-    private static final LocalDate SPRING_END = LocalDate.of(THIS_YEAR, 6, 20);
-    private static final LocalDate SUMMER_START = LocalDate.of(THIS_YEAR, 6, 21);
-    private static final LocalDate SUMMER_END = LocalDate.of(THIS_YEAR, 9, 20);
-    private static final LocalDate AUTUMN_START = LocalDate.of(THIS_YEAR, 9, 21);
-    private static final LocalDate AUTUMN_END = LocalDate.of(THIS_YEAR, 12, 20);
-    private static final LocalDate WINTER_START = LocalDate.of(THIS_YEAR, 12, 21);
-    private static final LocalDate WINTER_END = LocalDate.of(THIS_YEAR+1, 3, 20);
-
-    SPRING("spring", SPRING_START, SPRING_END),
-    SUMMER("summer", , ),
-    AUTUMN("autumn", , ),
-    WINTER("winter", , );
+    SPRING("spring", new Period(3, 21), new Period(6, 20)),
+    SUMMER("summer", new Period(6, 21), new Period(9, 20)),
+    AUTUMN("autumn", new Period(9, 21), new Period(12, 20)),
+    WINTER("winter", new Period(12, 21), new Period(3, 20));
 
     public final String name;
-    public LocalDate startDate;
-    public LocalDate endDate;
+    public final Period startDate;
+    public final Period endDate;
 
-    private Season(String name, LocalDate startDate, LocalDate endDate){
+    private Season(String name, Period startDate, Period endDate){
         this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;
     }
 
-    public static Season current(LocalDate today){
-        return
+    public static Season getCurrent() throws Exception {
+        LocalDate today = LocalDate.now();
+
+        for(Season s : values()){
+           LocalDate start = LocalDate.of(LocalDate.now().getYear(), s.startDate.month, s.startDate.day);
+           LocalDate end = LocalDate.of(LocalDate.now().getYear(), s.endDate.month, s.endDate.day);
+
+           if(today.isAfter(start) && today.isBefore(end)){
+               return s;
+           }
+       }
+       throw new Exception("Provided date does not correspond to defined seasons");
     }
+
+    public static class Period {
+        public int month;
+        public int day;
+
+        public Period(int month, int day){
+            this.month = month;
+            this.day = day;
+        }
+    }
+
+
 }
