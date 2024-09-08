@@ -19,35 +19,34 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@RestController("/recipes")
 @CrossOrigin(origins = "http://localhost:3000")
 public class RecetteController {
-
+    
     @Autowired
     private RecetteService rs;
 
-    @GetMapping("/recettes/")
-    public Iterable<Recette> getAllRecettes() {
+    @GetMapping
+    public Iterable<Recette> getAllRecettes(){
         return rs.getAllRecettes();
     }
 
-    @GetMapping("/recettes/{season}")
-    public Iterable<Recette> getRecettesBySeason(@PathVariable("season") String season) {
+    @GetMapping("/{season}")
+    public Iterable<Recette> getRecettesBySeason(@PathVariable("season") String season){
         return rs.getRecettesBySeason(season);
     }
 
-    @GetMapping("/recette/{id}")
-    public Recette getRecette(@PathVariable("id") final Long id) {
-        System.out.println("Serving recette " + id.toString());
+    @GetMapping("/{id}")
+    public Recette getRecette(@PathVariable("id") final Long id){
         Optional<Recette> recette = rs.getRecette(id);
-        if (recette.isPresent()) {
+        if(recette.isPresent()){
             return recette.get();
-        } else {
+        }else{
             return null;
         }
     }
 
-    @PutMapping("/recette/{id}")
+    @PutMapping("/{id}")
     public Recette updateRecette(@PathVariable("id") final Long id, @RequestBody Recette recette) {
         System.out.println("Updating recette " + id.toString());
         Optional<Recette> re = rs.getRecette(id);
@@ -78,8 +77,8 @@ public class RecetteController {
         }
     }
 
-    @PostMapping(path = "/recette/add", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Recette createRecette(@RequestBody String payload) throws JsonMappingException, JsonProcessingException {
+    @PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
+    public Recette createRecette(@RequestBody String payload) throws JsonMappingException, JsonProcessingException{
         System.out.println(payload);
         ObjectMapper mapper = new ObjectMapper();
 
@@ -93,8 +92,8 @@ public class RecetteController {
         }
     }
 
-    @DeleteMapping("/recette/{id}")
-    public void deleteRecette(@PathVariable("id") final Long id) {
+    @DeleteMapping("/{id}")
+    public void deleteRecette(@PathVariable("id") final Long id){
         rs.deleteRecette(id);
     }
 }
