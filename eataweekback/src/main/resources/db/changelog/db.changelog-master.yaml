@@ -1,3 +1,9 @@
 databaseChangeLog:
  - include:
      file: db/changelog/db.init.sql
+ - include:
+     file: db/changelog/add_recipes_steps.sql
+ - include:
+     file: db/changelog/add_menu.sql
+ - include:
+     file: db/changelog/update_measure_table.sql
