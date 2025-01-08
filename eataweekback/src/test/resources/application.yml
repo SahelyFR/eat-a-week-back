@@ -1,0 +1,77 @@
+spring:
+    application:
+        name: eataweek-api
+    cloud:
+        config:
+            enabled: false
+        vault:
+            enabled: true
+            authentication: token
+            token: 00000000-0000-0000-0000-000000000000
+            kv:
+                backend: secret
+                default-context: docker/back/spring-config
+                enabled: true
+            scheme: http
+            uri: http://localhost:8200
+    config:
+        import: vault://
+    datasource:
+        password: ${database.password}
+        url: ${database.url}
+        username: ${database.username}
+    jpa:
+        hibernate:
+            ddl-auto: none
+        open-in-view: false
+        show-sql: true
+    liquibase:
+        change-log: classpath:db/changelog/db.changelog-master.yaml
+        enabled: true
+        password: ${database.password}
+        url: ${database.url}
+        user: ${database.username}
+    sql:
+        init:
+            continue-on-error: true
+            mode: never
+
+cors:
+    allowed:
+        origins: http://localhost:3322,http://localhost:3001
+logging:
+    level:
+        com:
+            sahelyfr:
+                eataweekback: DEBUG
+        root: INFO
+    pattern:
+        level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
+management:
+    endpoints:
+        web:
+            exposure:
+                include: prometheus
+    metrics:
+        distribution:
+            percentiles-histogram:
+                http:
+                    server:
+                        request: true
+    tracing:
+        sampling:
+            probability: 1.0
+security:
+    jwt:
+        expiration-time: 3600000
+        secret-key: ${jwt.secret}
+
+---
+spring:
+    config:
+        activate:
+            on-profile: local
+    cloud:
+        vault:
+            kv:
+                default-context: local/back/spring-config
